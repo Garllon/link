@@ -1,7 +1,7 @@
 LIB_PATH = File.dirname(__FILE__)
 $LOAD_PATH.unshift LIB_PATH
 
-require 'gosu'
+require 'ruby2d'
 require 'link/window'
 require 'link/player'
 

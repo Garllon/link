@@ -1,51 +1,57 @@
 module Link
   class Player
-    attr_reader :window, :icon, :x, :y
+    attr_reader :icon, :x, :y
 
     START_POINT_X = 50
     START_POINT_Y = 450
     STEP_WIDTH = 3
 
-    def initialize(window)
-      @window = window
-      @icon = Gosu::Image.new(window, './images/down1.png', true)
+    def initialize(viewport_width:, viewport_height:)
+      @viewport_width = viewport_width
+      @viewport_height = viewport_height
 
       @x = START_POINT_X
       @y = START_POINT_Y
       @step_counter = 1
       @last_direction = 'down'
+
+      @icon = build_icon('down', 1)
     end
 
     def draw
-      icon.draw(x, y, 1)
+      icon
     end
 
     def move_left
       render_image('left')
 
-      return @x = 0 if x < 0
       @x -= STEP_WIDTH
+      @x = 0 if @x < 0
+      sync_icon_position
     end
 
     def move_right
       render_image('right')
 
       @x += STEP_WIDTH
-      return @x = rightmost_position if x > rightmost_position
+      @x = rightmost_position if @x > rightmost_position
+      sync_icon_position
     end
 
     def move_up
       render_image('up')
 
-      return @y = 0 if @y < 0
       @y -= STEP_WIDTH
+      @y = 0 if @y < 0
+      sync_icon_position
     end
 
     def move_down
       render_image('down')
 
       @y += STEP_WIDTH
-      return @y = lowest_position if y > lowest_position
+      @y = lowest_position if @y > lowest_position
+      sync_icon_position
     end
 
     private
@@ -58,15 +64,26 @@ module Link
         @last_direction = direction
         @step_counter = 1
       end
-      @icon = Gosu::Image.new(window, "./images/#{direction}#{@step_counter}.png", true)
+
+      @icon.remove
+      @icon = build_icon(direction, @step_counter)
     end
 
     def rightmost_position
-      window.width - icon.width
+      @viewport_width - icon.instance_variable_get(:@img_width)
     end
 
     def lowest_position
-      window.height - icon.height
+      @viewport_height - icon.instance_variable_get(:@img_height)
+    end
+
+    def build_icon(direction, frame)
+      Sprite.new("./images/#{direction}#{frame}.png", x: @x, y: @y)
+    end
+
+    def sync_icon_position
+      @icon.x = @x
+      @icon.y = @y
     end
   end
 end
